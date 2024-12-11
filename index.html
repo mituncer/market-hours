@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Zone and Market Hours</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        p {
+            font-size: 1.2em;
+            color: #34495e;
+        }
+    </style>
+</head>
+<body>
+    <h1>Local Time and New York Market Hours</h1>
+    <p id="local-time">Detecting your local time...</p>
+    <p id="market-hours">Calculating market hours...</p>
+
+    <script>
+        // Function to display local time and time zone
+        function displayLocalTime() {
+            const now = new Date();
+            const localTime = now.toLocaleString();
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.getElementById('local-time').textContent = `Your local time: ${localTime} (${timeZone})`;
+        }
+
+        // Function to calculate New York market hours in local time
+        function displayMarketHours() {
+            const nyTimeZone = 'America/New_York';
+            const options = { timeZone: nyTimeZone, hour: '2-digit', minute: '2-digit' };
+
+            const nyOpen = new Date();
+            nyOpen.setHours(9, 30, 0, 0); // NYSE opening time: 9:30 AM
+
+            const nyClose = new Date();
+            nyClose.setHours(16, 0, 0, 0); // NYSE closing time: 4:00 PM
+
+            const localOpen = nyOpen.toLocaleTimeString([], options);
+            const localClose = nyClose.toLocaleTimeString([], options);
+
+            const openTime = new Intl.DateTimeFormat('en-US', { ...options, timeZoneName: 'short' }).format(nyOpen);
+            const closeTime = new Intl.DateTimeFormat('en-US', { ...options, timeZoneName: 'short' }).format(nyClose);
+
+            document.getElementById('market-hours').textContent = `New York Market Hours in your local time: 
+            Open: ${openTime}, Close: ${closeTime}`;
+        }
+
+        // Call functions to display time and market hours
+        displayLocalTime();
+        displayMarketHours();
+    </script>
+</body>
+</html>
