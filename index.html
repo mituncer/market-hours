@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Zone and Market Hours</title>
+    <title>Market Hours</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,46 +12,174 @@
         }
         h1 {
             color: #2c3e50;
+            font-size: 2em;
+        }
+        .container {
+            background-color: #dfe6e9;
+            border: 3px solid #2c3e50; /* Darker frame color */
+            padding: 20px;
+            margin: 20px auto;
+            width: 80%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         p {
-            font-size: 1.2em;
+            font-size: 1em; /* Smaller text size */
             color: #34495e;
+        }
+        .time-bar {
+            position: relative;
+            width: 90%;
+            height: 20px; /* Shrink height */
+            background: #ecf0f1;
+            margin: 20px auto;
+            border: 1px solid #bdc3c7;
+        }
+        .highlight {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            background: rgba(255, 0, 0, 0.2);
+        }
+        .line {
+            position: absolute;
+            top: -10px;
+            bottom: -40px; /* Shrink line height */
+            width: 2px;
+        }
+        .local-time {
+            background: blue;
+            z-index: 10; /* Ensure it's in front of other elements */
+            position: relative; /* Required for z-index to take effect */
+        }
+        .market-time {
+            background: red;
+        }
+        .label {
+            position: absolute;
+            top: 20px; /* Adjusted for market names */
+            font-size: 0.8em; /* Smaller text size */
+            color: #2c3e50;
+        }
+        .time-label {
+            position: absolute;
+            top: 40px; /* Adjusted for time display */
+            font-size: 0.8em; /* Smaller text size */
+            color: #2c3e50;
+        }
+        .time-bar + .time-bar {
+            margin-top: 40px; /* Reduce spacing */
         }
     </style>
 </head>
 <body>
-    <h1>Local Time and New York Market Hours</h1>
-    <p id="local-time">Detecting your local time...</p>
-    <p id="market-hours">Calculating market hours...</p>
+    <h1>Market Hours</h1>
+    <div class="container">
+        <p id="local-time">Detecting your local time...</p>
+
+        <div class="time-bar" id="time-bar">
+            <div class="highlight" id="market-highlight"></div>
+            <div class="line local-time" id="local-time-line"></div>
+            <div class="label" id="local-time-label"></div>
+            <div class="line market-time" id="market-open-line"></div>
+            <div class="label" id="market-open-label">New York Opens</div>
+            <div class="time-label" id="market-open-time"></div>
+            <div class="line market-time" id="market-close-line"></div>
+            <div class="label" id="market-close-label">New York Closes</div>
+            <div class="time-label" id="market-close-time"></div>
+        </div>
+
+        <div class="time-bar" id="bist-time-bar">
+            <div class="highlight" id="bist-highlight"></div>
+            <div class="line market-time" id="bist-open-line"></div>
+            <div class="label" id="bist-open-label">BIST Opens</div>
+            <div class="time-label" id="bist-open-time"></div>
+            <div class="line market-time" id="bist-close-line"></div>
+            <div class="label" id="bist-close-label">BIST Closes</div>
+            <div class="time-label" id="bist-close-time"></div>
+        </div>
+    </div>
 
     <script>
-        // Function to display local time and time zone
         function displayLocalTime() {
             const now = new Date();
-            const localTime = now.toLocaleString();
+            const localTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
             const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             document.getElementById('local-time').textContent = `Your local time: ${localTime} (${timeZone})`;
+            updateLocalTimeLine(now, localTime);
         }
 
-        // Function to calculate New York market hours in local time
         function displayMarketHours() {
-            const nyTimeZone = 'America/New_York';
-            const options = { timeZone: nyTimeZone, hour: '2-digit', minute: '2-digit' };
+            const nyOpenUTC = new Date();
+            nyOpenUTC.setUTCHours(14, 30, 0, 0);
+            const nyCloseUTC = new Date();
+            nyCloseUTC.setUTCHours(21, 0, 0, 0);
+            const bistOpenUTC = new Date();
+            bistOpenUTC.setUTCHours(7, 30, 0, 0);
+            const bistCloseUTC = new Date();
+            bistCloseUTC.setUTCHours(14, 0, 0, 0);
 
-            const nyOpen = new Date();
-            nyOpen.setHours(9, 30, 0, 0); // NYSE opening time: 9:30 AM
+            const localNYOpen = new Date(nyOpenUTC.toLocaleString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
+            const localNYClose = new Date(nyCloseUTC.toLocaleString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
+            const localBISTOpen = new Date(bistOpenUTC.toLocaleString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
+            const localBISTClose = new Date(bistCloseUTC.toLocaleString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
 
-            const nyClose = new Date();
-            nyClose.setHours(16, 0, 0, 0); // NYSE closing time: 4:00 PM
+            updateMarketTimeLines(localNYOpen, localNYClose, 'market-open-line', 'market-close-line', 'market-highlight', 'market-open-time', 'market-close-time');
+            updateMarketTimeLines(localBISTOpen, localBISTClose, 'bist-open-line', 'bist-close-line', 'bist-highlight', 'bist-open-time', 'bist-close-time');
+        }
 
-            const localOpen = nyOpen.toLocaleTimeString([], options);
-            const localClose = nyClose.toLocaleTimeString([], options);
+        function updateLocalTimeLine(now, localTime) {
+            const totalMinutes = now.getHours() * 60 + now.getMinutes();
+            const percentage = (totalMinutes / (24 * 60)) * 100;
 
-            const openTime = new Intl.DateTimeFormat('en-US', { ...options, timeZoneName: 'short' }).format(nyOpen);
-            const closeTime = new Intl.DateTimeFormat('en-US', { ...options, timeZoneName: 'short' }).format(nyClose);
+            const localTimeLine = document.getElementById('local-time-line');
+            localTimeLine.style.left = `${percentage}%`;
+            localTimeLine.style.height = `140px`;
 
-            document.getElementById('market-hours').textContent = `New York Market Hours in your local time: 
-            Open: ${openTime}, Close: ${closeTime}`;
+            const localTimeLabel = document.getElementById('local-time-label');
+            localTimeLabel.style.left = `${percentage + 1}%`;
+            localTimeLabel.style.top = '140px'; // Positioning the label at the bottom of the blue line
+            localTimeLabel.textContent = `Local Time`;
+
+            const localTimeBelowLabel = document.createElement('div');
+            localTimeBelowLabel.classList.add('time-label');
+            localTimeBelowLabel.style.left = `${percentage + 0.5}%`;
+            localTimeBelowLabel.textContent = localTime;
+            localTimeBelowLabel.style.top = '160px';
+            localTimeLine.parentNode.appendChild(localTimeBelowLabel);
+        }
+
+        function updateMarketTimeLines(openTime, closeTime, openLineId, closeLineId, highlightId, openTimeId, closeTimeId) {
+            const openMinutes = openTime.getHours() * 60 + openTime.getMinutes();
+            const closeMinutes = closeTime.getHours() * 60 + closeTime.getMinutes();
+
+            const openPercentage = (openMinutes / (24 * 60)) * 100;
+            const closePercentage = (closeMinutes / (24 * 60)) * 100;
+
+            const marketOpenLine = document.getElementById(openLineId);
+            const marketCloseLine = document.getElementById(closeLineId);
+            const marketHighlight = document.getElementById(highlightId);
+
+            marketOpenLine.style.left = `${openPercentage}%`;
+            marketCloseLine.style.left = `${closePercentage}%`;
+
+            marketHighlight.style.left = `${openPercentage}%`;
+            marketHighlight.style.width = `${closePercentage - openPercentage}%`;
+
+            const marketOpenLabel = document.getElementById(`${openLineId.replace('-line', '-label')}`);
+            const marketCloseLabel = document.getElementById
+
+             marketOpenLabel.style.left = `${openPercentage + 1}%`;
+
+            const marketOpenTimeLabel = document.getElementById(openTimeId);
+            marketOpenTimeLabel.style.left = `${openPercentage + 1}%`;
+            marketOpenTimeLabel.textContent = `${openTime.getHours().toString().padStart(2, '0')}:${openTime.getMinutes().toString().padStart(2, '0')}`;
+
+            marketCloseLabel.style.left = `${closePercentage + 1}%`;
+
+            const marketCloseTimeLabel = document.getElementById(closeTimeId);
+            marketCloseTimeLabel.style.left = `${closePercentage + 1}%`;
+            marketCloseTimeLabel.textContent = `${closeTime.getHours().toString().padStart(2, '0')}:${closeTime.getMinutes().toString().padStart(2, '0')}`;
         }
 
         // Call functions to display time and market hours
