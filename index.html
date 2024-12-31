@@ -82,6 +82,13 @@
         }
         .market-closed-label {
             position: absolute !important;
+            left: 10px !important;  /* Added some padding from the left edge */
+            top: 5px !important;    /* Adjusted to move inside the time bar */
+            transform: none !important;
+            color: #ecf0f1 !important;  /* Ensuring text is visible on the dark background */
+        }
+        .bist-closed-label {
+            position: absolute !important;
             left: 0 !important;
             top: 30px !important;
             transform: none !important;  // This will override any existing transforms
@@ -218,9 +225,9 @@
 
             document.getElementById('bist-open-line').style.display = 'none';
             
-            const marketLabel = document.getElementById('bist-open-label');
-            marketLabel.innerHTML = 'BIST Closed Today';
-            marketLabel.classList.add('bist-closed-label');
+            const bistLabel = document.getElementById('bist-open-label');
+            bistLabel.innerHTML = 'BIST Closed Today';
+            bistLabel.classList.add('bist-closed-label');
 
             document.getElementById('bist-open-time').style.display = 'none';
             
