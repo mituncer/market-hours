@@ -122,7 +122,7 @@
 
             const publicHolidays = {
                 NY: [ "2024-12-31", "2025-01-01", "2025-07-04", "2025-12-25", "2026-01-01", "2026-07-04", "2026-12-25"],
-                BIST: ["2025-01-01", "2025-04-23", "2025-05-01", "2025-05-19", "2025-07-15", "2025-08-30", "2025-10-29", "2026-01-01", "2026-04-23", "2026-05-01", "2026-05-19", "2026-07-15", "2026-08-30", "2026-10-29"]
+                BIST: ["2024-12-31", "2025-01-01", "2025-04-23", "2025-05-01", "2025-05-19", "2025-07-15", "2025-08-30", "2025-10-29", "2026-01-01", "2026-04-23", "2026-05-01", "2026-05-19", "2026-07-15", "2026-08-30", "2026-10-29"]
             };
 
             const todayStr = now.toISOString().split("T")[0];
@@ -217,8 +217,14 @@
         if (!isWorkingDay("BIST")) {
 
             document.getElementById('bist-open-line').style.display = 'none';
+            
             document.getElementById('bist-open-label').innerHTML = 'BIST Closed Today';
             document.getElementById('bist-open-time').style.display = 'none';
+
+            const marketLabel = document.getElementById('bist-open-label');
+            marketLabel.innerHTML = 'BIST Closed Today';
+            marketLabel.classList.add('bist-closed-label');
+
             
             document.getElementById('bist-close-line').style.display = 'none';
             document.getElementById('bist-close-label').style.display = 'none';
@@ -229,15 +235,11 @@
         if (!isWorkingDay("NY")) {
             
             document.getElementById('market-open-line').style.display = 'none';
-            // document.getElementById('market-open-label').innerHTML = 'NYSE Closed Today';
 
             const marketLabel = document.getElementById('market-open-label');
             marketLabel.innerHTML = 'NYSE Closed Today';
             marketLabel.classList.add('market-closed-label');
-
-            // document.getElementById('market-open-label').style.position = 'absolute';
-            // document.getElementById('market-open-label').style.left = '0%';
-                      
+                     
             document.getElementById('market-open-time').style.display = 'none';
             
             document.getElementById('market-close-line').style.display = 'none';
