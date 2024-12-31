@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Market Hours</title>
     <style>
+        /* Previous styles remain the same */
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -62,12 +63,16 @@
             top: 30px;
             font-size: 0.9em;
             color: #ecf0f1;
+            white-space: nowrap; /* Prevent text wrapping */
+            transform: rotate(-45deg); /* Rotate the text */
+            transform-origin: left top; /* Set rotation origin */
         }
         .time-label {
             position: absolute;
             top: 50px;
             font-size: 0.9em;
             color: #ecf0f1;
+            white-space: nowrap; /* Prevent text wrapping */
         }
         .time-bar + .time-bar {
             margin-top: 60px;
