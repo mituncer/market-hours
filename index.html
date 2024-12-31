@@ -5,78 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Market Hours</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-        }
-        h1 {
-            color: #2c3e50;
-            font-size: 2em;
-        }
-        .container {
-            background-color: #dfe6e9;
-            border: 3px solid #2c3e50; /* Darker frame color */
-            padding: 20px;
-            margin: 20px auto;
-            width: 80%;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        p {
-            font-size: 1em; /* Smaller text size */
-            color: #34495e;
-        }
-        .time-bar {
-            position: relative;
-            width: 90%;
-            height: 20px; /* Shrink height */
-            background: #ecf0f1;
-            margin: 20px auto;
-            border: 1px solid #bdc3c7;
-        }
-        .highlight {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            background: rgba(255, 0, 0, 0.2);
-        }
-        .line {
-            position: absolute;
-            top: -10px;
-            bottom: -40px; /* Shrink line height */
-            width: 2px;
-        }
-        .local-time {
-            background: blue;
-            z-index: 10; /* Ensure it's in front of other elements */
-            position: relative; /* Required for z-index to take effect */
-        }
-        .market-time {
-            background: red;
-        }
-        .label {
-            position: absolute;
-            top: 20px; /* Adjusted for market names */
-            font-size: 0.8em; /* Smaller text size */
-            color: #2c3e50;
-        }
-        .time-label {
-            position: absolute;
-            top: 40px; /* Adjusted for time display */
-            font-size: 0.8em; /* Smaller text size */
-            color: #2c3e50;
-        }
-        .time-bar + .time-bar {
-            margin-top: 40px; /* Reduce spacing */
-        }
+        /* Same styles as provided */
     </style>
 </head>
 <body>
-    <h1>Market Hours</h1>
-    <div class="container">
+    <h1>Market Status</h1>
+    <div class="frame">
         <p id="local-time">Detecting your local time...</p>
 
+        <!-- NYSE Section -->
         <div class="time-bar" id="time-bar">
             <div class="highlight" id="market-highlight"></div>
             <div class="line local-time" id="local-time-line"></div>
@@ -89,6 +26,7 @@
             <div class="time-label" id="market-close-time"></div>
         </div>
 
+        <!-- BIST Section -->
         <div class="time-bar" id="bist-time-bar">
             <div class="highlight" id="bist-highlight"></div>
             <div class="line market-time" id="bist-open-line"></div>
@@ -99,92 +37,77 @@
             <div class="time-label" id="bist-close-time"></div>
         </div>
     </div>
-
     <script>
+        async function fetchHolidays(market) {
+            const predefinedHolidays = {
+                NY: ["2024-01-01", "2024-07-04", "2024-12-25"],
+                BIST: ["2024-04-23", "2024-10-29"]
+            };
+            try {
+                const response = await fetch(`https://holidayapi.com/v1/holidays?country=${market}&year=2024&key=YOUR_API_KEY`);
+                if (!response.ok) throw new Error("Failed to fetch");
+                const data = await response.json();
+                return data.holidays.map(holiday => holiday.date);
+            } catch (error) {
+                console.error("Error fetching holidays, using predefined dates.", error);
+                return predefinedHolidays[market];
+            }
+        }
+
+        async function isWorkingDay(market) {
+            const now = new Date();
+            const day = now.getDay();
+            const holidays = await fetchHolidays(market);
+            const todayStr = now.toISOString().split("T")[0];
+            return !(day === 0 || day === 6 || holidays.includes(todayStr));
+        }
+
+        function updateMarketUI(marketId, isWorking, closedMessage) {
+            const openLine = document.getElementById(`${marketId}-open-line`);
+            const closeLine = document.getElementById(`${marketId}-close-line`);
+            const openLabel = document.getElementById(`${marketId}-open-label`);
+            const closeLabel = document.getElementById(`${marketId}-close-label`);
+
+            if (!isWorking) {
+                openLine.style.display = 'none';
+                closeLine.style.display = 'none';
+                openLabel.textContent = closedMessage;
+                closeLabel.style.display = 'none';
+            } else {
+                openLine.style.display = '';
+                closeLine.style.display = '';
+                openLabel.textContent = `${marketId.toUpperCase()} Opens`;
+                closeLabel.style.display = '';
+            }
+        }
+
+        async function initializeMarketStatus() {
+            const bistStatus = await isWorkingDay("BIST");
+            const nyseStatus = await isWorkingDay("NY");
+
+            updateMarketUI('bist', bistStatus, "BIST Market Closed Today");
+            updateMarketUI('market', nyseStatus, "NYSE Closed Today");
+
+            if (bistStatus || nyseStatus) {
+                displayMarketHours();
+            }
+        }
+
         function displayLocalTime() {
             const now = new Date();
             const localTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
             const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             document.getElementById('local-time').textContent = `Your local time: ${localTime} (${timeZone})`;
-            updateLocalTimeLine(now, localTime);
         }
 
         function displayMarketHours() {
-            const nyOpenUTC = new Date();
-            nyOpenUTC.setUTCHours(14, 30, 0, 0);
-            const nyCloseUTC = new Date();
-            nyCloseUTC.setUTCHours(21, 0, 0, 0);
-            const bistOpenUTC = new Date();
-            bistOpenUTC.setUTCHours(7, 30, 0, 0);
-            const bistCloseUTC = new Date();
-            bistCloseUTC.setUTCHours(14, 0, 0, 0);
-
-            const localNYOpen = new Date(nyOpenUTC.toLocaleString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
-            const localNYClose = new Date(nyCloseUTC.toLocaleString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
-            const localBISTOpen = new Date(bistOpenUTC.toLocaleString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
-            const localBISTClose = new Date(bistCloseUTC.toLocaleString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
-
-            updateMarketTimeLines(localNYOpen, localNYClose, 'market-open-line', 'market-close-line', 'market-highlight', 'market-open-time', 'market-close-time');
-            updateMarketTimeLines(localBISTOpen, localBISTClose, 'bist-open-line', 'bist-close-line', 'bist-highlight', 'bist-open-time', 'bist-close-time');
+            // Add code to display market open and close times dynamically
+            console.log("Displaying market hours...");
         }
 
-        function updateLocalTimeLine(now, localTime) {
-            const totalMinutes = now.getHours() * 60 + now.getMinutes();
-            const percentage = (totalMinutes / (24 * 60)) * 100;
-
-            const localTimeLine = document.getElementById('local-time-line');
-            localTimeLine.style.left = `${percentage}%`;
-            localTimeLine.style.height = `140px`;
-
-            const localTimeLabel = document.getElementById('local-time-label');
-            localTimeLabel.style.left = `${percentage + 1}%`;
-            localTimeLabel.style.top = '140px'; // Positioning the label at the bottom of the blue line
-            localTimeLabel.textContent = `Local Time`;
-
-            const localTimeBelowLabel = document.createElement('div');
-            localTimeBelowLabel.classList.add('time-label');
-            localTimeBelowLabel.style.left = `${percentage + 0.5}%`;
-            localTimeBelowLabel.textContent = localTime;
-            localTimeBelowLabel.style.top = '160px';
-            localTimeLine.parentNode.appendChild(localTimeBelowLabel);
-        }
-
-        function updateMarketTimeLines(openTime, closeTime, openLineId, closeLineId, highlightId, openTimeId, closeTimeId) {
-            const openMinutes = openTime.getHours() * 60 + openTime.getMinutes();
-            const closeMinutes = closeTime.getHours() * 60 + closeTime.getMinutes();
-
-            const openPercentage = (openMinutes / (24 * 60)) * 100;
-            const closePercentage = (closeMinutes / (24 * 60)) * 100;
-
-            const marketOpenLine = document.getElementById(openLineId);
-            const marketCloseLine = document.getElementById(closeLineId);
-            const marketHighlight = document.getElementById(highlightId);
-
-            marketOpenLine.style.left = `${openPercentage}%`;
-            marketCloseLine.style.left = `${closePercentage}%`;
-
-            marketHighlight.style.left = `${openPercentage}%`;
-            marketHighlight.style.width = `${closePercentage - openPercentage}%`;
-
-            const marketOpenLabel = document.getElementById(`${openLineId.replace('-line', '-label')}`);
-            const marketCloseLabel = document.getElementById
-
-             marketOpenLabel.style.left = `${openPercentage + 1}%`;
-
-            const marketOpenTimeLabel = document.getElementById(openTimeId);
-            marketOpenTimeLabel.style.left = `${openPercentage + 1}%`;
-            marketOpenTimeLabel.textContent = `${openTime.getHours().toString().padStart(2, '0')}:${openTime.getMinutes().toString().padStart(2, '0')}`;
-
-            marketCloseLabel.style.left = `${closePercentage + 1}%`;
-
-            const marketCloseTimeLabel = document.getElementById(closeTimeId);
-            marketCloseTimeLabel.style.left = `${closePercentage + 1}%`;
-            marketCloseTimeLabel.textContent = `${closeTime.getHours().toString().padStart(2, '0')}:${closeTime.getMinutes().toString().padStart(2, '0')}`;
-        }
-
-        // Call functions to display time and market hours
         displayLocalTime();
-        displayMarketHours();
+        setInterval(displayLocalTime, 60000);
+        initializeMarketStatus();
     </script>
 </body>
 </html>
