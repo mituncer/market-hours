@@ -22,7 +22,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             text-align: left;
             width: 75%; /* Adjust width to your preference (e.g., 80%, 100%) */
-            height: 250px;
+            height: auto;
             margin: 0 auto; /* Centers the frame */
         }
         p {
@@ -78,10 +78,11 @@
     </style>
 </head>
 <body>
-    <h1>Market Status</h1>
+    <h1>Market and Holiday Status</h1>
     <div class="frame">
         <p id="local-time">Detecting your local time...</p>
-        
+        <p id="holiday-status"></p>
+
         <!-- NYSE Section -->
         <div class="time-bar" id="time-bar">
             <div class="highlight" id="market-highlight"></div>
@@ -108,22 +109,31 @@
     </div>
 
     <script>
-        // Check if it's a working day for the given market
-        function isWorkingDay(market) {
-            const now = new Date();
-            const day = now.getDay();
-            const todayStr = now.toISOString().split("T")[0];
-
-            const publicHolidays = {
+        function isHoliday(city) {
+            const today = new Date().toISOString().split('T')[0];
+            const holidays = {
                 NY: ["2024-01-01", "2024-07-04", "2024-12-25"],
-                BIST: ["2024-04-23", "2024-10-29"]
+                Istanbul: ["2024-04-23", "2024-10-29"]
             };
-
-            const isHoliday = publicHolidays[market]?.includes(todayStr);
-            return !(day === 0 || day === 6 || isHoliday);
+            return holidays[city]?.includes(today);
         }
 
-        // Display the local time
+        function checkHolidayStatus() {
+            const isNYHoliday = isHoliday("NY");
+            const isIstanbulHoliday = isHoliday("Istanbul");
+            const holidayStatus = document.getElementById("holiday-status");
+
+            if (isNYHoliday && isIstanbulHoliday) {
+                holidayStatus.textContent = "Today is a holiday in Istanbul and New York.";
+            } else if (isNYHoliday) {
+                holidayStatus.textContent = "Today is a holiday in New York.";
+            } else if (isIstanbulHoliday) {
+                holidayStatus.textContent = "Today is a holiday in Istanbul.";
+            } else {
+                holidayStatus.textContent = "Today is a working day in Istanbul and New York.";
+            }
+        }
+
         function displayLocalTime() {
             const now = new Date();
             const localTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -131,51 +141,13 @@
             document.getElementById('local-time').textContent = `Your local time: ${localTime} (${timeZone})`;
         }
 
-        // Update the market status based on working day
-        function updateMarketStatus() {
-            const isBistWorking = isWorkingDay("BIST");
-            const isNyWorking = isWorkingDay("NY");
+        displayLocalTime();
+        checkHolidayStatus();
 
-            if (!isBistWorking) {
-                document.getElementById('bist-close-line').style.display = 'none';
-                document.getElementById('bist-open-line').style.display = 'none';
-                document.getElementById('bist-open-label').innerHTML = 'BIST Market Closed Today';
-                document.getElementById('bist-close-label').style.display = 'none';
-            }
-
-            if (!isNyWorking) {
-                document.getElementById('market-close-line').style.display = 'none';
-                document.getElementById('market-open-line').style.display = 'none';
-                document.getElementById('market-open-label').innerHTML = 'NYSE Closed Today';
-                document.getElementById('market-close-label').style.display = 'none';
-            }
-
-            if (isBistWorking || isNyWorking) {
-                displayMarketHours();
-            }
-        }
-
-        // Display market hours
-        function displayMarketHours() {
-            console.log("Displaying market hours...");
-            // Add your existing logic to calculate and display market times
-        }
-
-        // Auto-refresh the site every minute
-        function enableAutoRefresh() {
-            setInterval(() => {
-                location.reload();
-            }, 60000);
-        }
-
-        // Initialize the application
-        function initialize() {
-            displayLocalTime();
-            updateMarketStatus();
-            enableAutoRefresh();
-        }
-
-        initialize();
+        // Refresh the site every minute
+        setInterval(() => {
+            location.reload();
+        }, 60000);
     </script>
 </body>
 </html>
