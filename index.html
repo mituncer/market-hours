@@ -115,8 +115,8 @@
             const day = now.getDay();
 
             const publicHolidays = {
-                NY: ["2024-12-31", "2024-01-01", "2024-07-04", "2024-12-25"],
-                BIST: ["2024-04-23", "2024-10-29"]
+                NY: [ "2024-01-01", "2024-07-04", "2024-12-25"],
+                BIST: ["2024-12-31","2024-04-23", "2024-10-29"]
             };
 
             const todayStr = now.toISOString().split("T")[0];
@@ -209,10 +209,16 @@
         displayLocalTime();
 
         if (!isWorkingDay("BIST")) {
-            document.getElementById('bist-close-line').style.display = 'none';
-            document.getElementById('bist-open-line').style.display = 'none';
-            document.getElementById('bist-open-label').innerHTML = 'BIST Market Closed Today';
-            document.getElementById('bist-close-label').style.display = 'none';
+
+            document.getElementById('BIST-open-line').style.display = 'none';
+            document.getElementById('BIST-open-label').innerHTML = 'NYSE Closed Today';
+            document.getElementById('BIST-open-time').style.display = 'none';
+            
+            document.getElementById('BIST-close-line').style.display = 'none';
+            document.getElementById('BIST-close-label').style.display = 'none';
+            document.getElementById('BIST-close-time').style.display = 'none';            
+            
+            document.getElementById('BIST-highlight').style.display = 'none';
         }
         if (!isWorkingDay("NY")) {
             
