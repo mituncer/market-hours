@@ -80,6 +80,12 @@
         .hidden {
             display: none;
         }
+        .market-closed-label {
+            position: absolute !important;
+            left: 0 !important;
+            top: 30px !important;
+            transform: none !important;  // This will override any existing transforms
+        }
     </style>
 </head>
 <body>
@@ -227,7 +233,7 @@
 
             const marketLabel = document.getElementById('market-open-label');
             marketLabel.innerHTML = 'NYSE Closed Today';
-            marketLabel.style.cssText = 'position: absolute !important; left: 0 !important; top: 30px !important;';
+            marketLabel.classList.add('market-closed-label');
 
             // document.getElementById('market-open-label').style.position = 'absolute';
             // document.getElementById('market-open-label').style.left = '0%';
