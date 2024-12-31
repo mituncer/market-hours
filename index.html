@@ -215,10 +215,17 @@
             document.getElementById('bist-close-label').style.display = 'none';
         }
         if (!isWorkingDay("NY")) {
-            document.getElementById('market-close-line').style.display = 'none';
+            
             document.getElementById('market-open-line').style.display = 'none';
             document.getElementById('market-open-label').innerHTML = 'NYSE Closed Today';
+            document.getElementById('market-open-time').style.display = 'none';
+            
+            document.getElementById('market-close-line').style.display = 'none';
             document.getElementById('market-close-label').style.display = 'none';
+            document.getElementById('market-close-time').style.display = 'none';            
+            
+            document.getElementById('market-highlight').style.display = 'none';
+           
         }
         
         
