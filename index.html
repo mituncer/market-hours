@@ -218,13 +218,11 @@
 
             document.getElementById('bist-open-line').style.display = 'none';
             
-            document.getElementById('bist-open-label').innerHTML = 'BIST Closed Today';
-            document.getElementById('bist-open-time').style.display = 'none';
-
             const marketLabel = document.getElementById('bist-open-label');
             marketLabel.innerHTML = 'BIST Closed Today';
             marketLabel.classList.add('bist-closed-label');
 
+            document.getElementById('bist-open-time').style.display = 'none';
             
             document.getElementById('bist-close-line').style.display = 'none';
             document.getElementById('bist-close-label').style.display = 'none';
