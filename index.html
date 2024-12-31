@@ -213,21 +213,17 @@
             document.getElementById('bist-open-line').style.display = 'none';
             document.getElementById('bist-open-label').innerHTML = 'BIST Market Closed Today';
             document.getElementById('bist-close-label').style.display = 'none';
-
-            if (!isWorkingDay("NY")) {
-                document.getElementById('market-close-line').style.display = 'none';
-                document.getElementById('market-open-line').style.display = 'none';
-                document.getElementById('market-open-label').innerHTML = 'NYSE Closed Today';
-                document.getElementById('market-close-label').style.display = 'none';
-            }
-        } else if (!isWorkingDay("NY")) {
+        }
+        if (!isWorkingDay("NY")) {
             document.getElementById('market-close-line').style.display = 'none';
             document.getElementById('market-open-line').style.display = 'none';
             document.getElementById('market-open-label').innerHTML = 'NYSE Closed Today';
             document.getElementById('market-close-label').style.display = 'none';
-        } else {
-            displayMarketHours();
         }
+        
+        
+        displayMarketHours();
+        
 
         setInterval(() => {
             location.reload();
