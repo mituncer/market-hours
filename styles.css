@@ -18,7 +18,7 @@ h1 {
   text-align: left;
   width: 75%;
   height: 250px;
-  margin: 10px 0; /* Add vertical margin */
+  margin: 40px 0 0; /* Add 40px top margin for spacing */
 }
 
 p {
