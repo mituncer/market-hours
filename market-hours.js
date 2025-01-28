@@ -35,7 +35,7 @@ function displayMarketHours() {
     const bistOpenUTC = new Date();
     bistOpenUTC.setUTCHours(7, 0, 0, 0);
     const bistCloseUTC = new Date();
-    bistCloseUTC.setUTCHours(14, 0, 0, 0);
+    bistCloseUTC.setUTCHours(15, 0, 0, 0);
 
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const localNYOpen = new Date(nyOpenUTC.toLocaleString('en-US', { timeZone }));
